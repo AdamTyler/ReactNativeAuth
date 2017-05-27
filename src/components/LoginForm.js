@@ -44,20 +44,27 @@ class LoginForm extends Component {
     const { email, password } = this.state
     this.setState({error: '', submitting: true})
     firebase.auth().signInWithEmailAndPassword(email, password)
-    .catch(() => {
-      firebase.auth().createUserWithEmailAndPassword(email, password)
-      .catch((ex) => {
-        this.setState({error: 'Authentication Error', submitting: false})
+      .then(this.onLoginSuccess.bind(this))
+      .catch(ex => {
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(this.onSignupSuccess.bind(this))
+        .catch(this.onSignupFail.bind(this))
       })
-      .then((res) => {
-        console.log('signup', res)
-        this.setState({submitting: false})
-      })
-    })
-    .then(res => {
-      console.log('login', res)
-      this.setState({submitting: false})
-    })
+  }
+
+  onLoginSuccess(res) {
+    console.log('login success', res)
+    this.setState({submitting: false, email: '', password: '', error: ''})
+  }
+
+  onSignupFail(ex) {
+    console.log('signup fail', ex)
+    this.setState({error: 'Authentication Error', submitting: false})
+  }
+
+  onSignupSuccess(res) {
+    console.log('signup success', res)
+    this.setState({submitting: false, email: '', password: '', error: ''})
   }
 
   renderButton() {
